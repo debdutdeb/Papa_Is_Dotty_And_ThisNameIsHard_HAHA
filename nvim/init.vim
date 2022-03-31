@@ -27,8 +27,10 @@ Plug 'junegunn/fzf.vim'
 Plug 'vifm/vifm.vim'
 
 " Theme
-" Plug 'rafi/awesome-vim-colorschemes'
-Plug 'sainnhe/everforest'
+Plug 'rafi/awesome-vim-colorschemes'
+" Plug 'sainnhe/everforest'
+Plug 'mswift42/vim-themes'
+Plug 'rainglow/vim'
 
 " Tabs
 Plug 'ap/vim-buftabline'
@@ -36,7 +38,7 @@ Plug 'ap/vim-buftabline'
 call plug#end()
 
 set background=dark
-colorscheme everforest
+colorscheme gruvbox
 
 syntax on
 
@@ -55,7 +57,7 @@ set wrap
 set smartcase
 set noswapfile
 set nobackup
-set undodir=~/.vim/undodir
+set undodir=~/.config/nvim/undodir
 set undofile
 set incsearch
 set termguicolors
@@ -115,7 +117,6 @@ vnoremap K :m '<-2<CR>gv=gv
 set statusline+=%#warningmsg#
 
 " Fix files automatically on save
-let g:ale_fixers = {}
 let g:ale_javascript_eslint_use_global = 1
 let g:ale_linters = {
   \'javascript': ['eslint'],
@@ -124,7 +125,12 @@ let g:ale_linters = {
 
 let g:ale_fixers = {
   \'javascript': ['prettier', 'eslint'],
+  \'typescript': ['prettier', 'eslint'],
+  \'tsx': ['prettier', 'eslint'],
+  \'jsx': ['prettier', 'eslint'],
   \'vue': ['eslint', 'stylelint'],
+  \'cpp': ['clang-format'],
+  \'rust': ['rustfmt'],
 \}
 
 let g:ale_linters_explicit = 1
@@ -162,3 +168,118 @@ nmap <silent> <c-\> :vsplit <CR>
 set hidden
 nmap <c-c> :bnext<CR>
 nmap <c-b> :bprev<CR>
+
+" Disable arrow keys please
+map <up> <nop>
+map <down> <nop>
+map <left> <nop>
+map <right> <nop>
+imap <up> <nop>
+imap <down> <nop>
+imap <left> <nop>
+imap <right> <nop>
+
+
+"CoC stuff
+
+set cmdheight=2
+set updatetime=300
+set shortmess+=c
+
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+" Use <c-space> to trigger completion.
+if has('nvim')
+  inoremap <silent><expr> <c-space> coc#refresh()
+else
+  inoremap <silent><expr> <c-@> coc#refresh()
+endif
+
+" Make <CR> auto-select the first completion item and notify coc.nvim to
+" format on enter, <cr> could be remapped by other vim plugin
+inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
+                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+" Use K to show documentation in preview window.
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  elseif (coc#rpc#ready())
+    call CocActionAsync('doHover')
+  else
+    execute '!' . &keywordprg . " " . expand('<cword>')
+  endif
+endfunction
+
+" Highlight the symbol and its references when holding the cursor.
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
+" Formatting selected code.
+xmap <leader>f  <Plug>(coc-format-selected)
+nmap <leader>f  <Plug>(coc-format-selected)
+
+" Format everything
+xmap <leader>ff :call CocActionAsync('format')<CR>
+nmap <leader>ff :call CocActionAsync('format')<CR>
+
+" Add `:Fold` command to fold current buffer.
+command! -nargs=? Fold :call     CocAction('fold', <f-args>)
+
+" Add `:Format` command to format current buffer.
+command! -nargs=0 Format :call CocActionAsync('format')
+
+" Add `:OR` command for organize imports of the current buffer.
+command! -nargs=0 OR   :call     CocActionAsync('runCommand', 'editor.action.organizeImport')
+
+command! -nargs=0 Prettier :CocCommand prettier.forceFormatDocument
+
+
+" NerdCommenter
+" Create default mappings
+let g:NERDCreateDefaultMappings = 1
+
+" Add spaces after comment delimiters by default
+let g:NERDSpaceDelims = 1
+
+" Use compact syntax for prettified multi-line comments
+let g:NERDCompactSexyComs = 1
+
+" Align line-wise comment delimiters flush left instead of following code indentation
+let g:NERDDefaultAlign = 'left'
+
+" Add your own custom formats or override the defaults
+let g:NERDCustomDelimiters = { 'c': { 'left': '/**','right': '*/' } }
+
+" Allow commenting and inverting empty lines (useful when commenting a region)
+let g:NERDCommentEmptyLines = 1
+
+" Enable trimming of trailing whitespace when uncommenting
+let g:NERDTrimTrailingWhitespace = 1
+
+" Enable NERDCommenterToggle to check all selected lines is commented or not
+let g:NERDToggleCheckAllLines = 1
+
+
+" Not yet sure what it does
+set exrc
+set secure
+
+" Return to last edit position when opening files (You want this!)
+autocmd BufReadPost *
+   \ if line("'\"") > 0 && line("'\"") <= line("$") |
+   \   exe "normal! g`\"" |
+   \ endif
+
+autocmd BufWritePre *.go :silent call CocAction('runCommand', 'editor.action.organizeImport')
+
