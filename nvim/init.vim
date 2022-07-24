@@ -283,3 +283,7 @@ autocmd BufReadPost *
 
 autocmd BufWritePre *.go :silent call CocAction('runCommand', 'editor.action.organizeImport')
 
+
+" Just a comment so that I don't forget
+" use ctrl+w w to jump into the coc documentation previews
+"  :grimacing:
